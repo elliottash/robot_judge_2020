@@ -1,0 +1,370 @@
+# HW03 (due October 12th)
+
+// Load the NLSY dataset
+webuse nlswork
+
+// Summarize the dataset
+summarize
+
+    Variable |        Obs        Mean    Std. Dev.       Min        Max
+-------------+---------------------------------------------------------
+      idcode |     28,534    2601.284    1487.359          1       5159
+        year |     28,534    77.95865    6.383879         68         88
+    birth_yr |     28,534    48.08509    3.012837         41         54
+         age |     28,510    29.04511    6.700584         14         46
+        race |     28,534    1.303392    .4822773          1          3
+-------------+---------------------------------------------------------
+         msp |     28,518    .6029175    .4893019          0          1
+     nev_mar |     28,518    .2296795    .4206341          0          1
+       grade |     28,532    12.53259    2.323905          0         18
+    collgrad |     28,534    .1680451    .3739129          0          1
+    not_smsa |     28,526    .2824441    .4501961          0          1
+-------------+---------------------------------------------------------
+      c_city |     28,526     .357218    .4791882          0          1
+       south |     28,526    .4095562    .4917605          0          1
+    ind_code |     28,193    7.692973    2.994025          1         12
+    occ_code |     28,413    4.777672    3.065435          1         13
+       union |     19,238    .2344319    .4236542          0          1
+-------------+---------------------------------------------------------
+      wks_ue |     22,830    2.548095    7.294463          0         76
+     ttl_exp |     28,534    6.215316    4.652117          0   28.88461
+      tenure |     28,101    3.123836    3.751409          0   25.91667
+       hours |     28,467    36.55956    9.869623          1        168
+    wks_work |     27,831    53.98933    29.03232          0        104
+-------------+---------------------------------------------------------
+     ln_wage |     28,534    1.674907    .4780935          0   5.263916
+
+describe
+
+Contains data from https://www.stata-press.com/data/r16/nlswork.dta
+  obs:        28,534                          National Longitudinal Survey.
+                                                Young Women 14-26 years of age
+                                                in 1968
+ vars:            21                          27 Nov 2018 08:14
+--------------------------------------------------------------------------------
+              storage   display    value
+variable name   type    format     label      variable label
+--------------------------------------------------------------------------------
+idcode          int     %8.0g                 NLS ID
+year            byte    %8.0g                 interview year
+birth_yr        byte    %8.0g                 birth year
+age             byte    %8.0g                 age in current year
+race            byte    %8.0g      racelbl    race
+msp             byte    %8.0g                 1 if married, spouse present
+nev_mar         byte    %8.0g                 1 if never married
+grade           byte    %8.0g                 current grade completed
+collgrad        byte    %8.0g                 1 if college graduate
+not_smsa        byte    %8.0g                 1 if not SMSA
+c_city          byte    %8.0g                 1 if central city
+south           byte    %8.0g                 1 if south
+ind_code        byte    %8.0g                 industry of employment
+occ_code        byte    %8.0g                 occupation
+union           byte    %8.0g                 1 if union
+wks_ue          byte    %8.0g                 weeks unemployed last year
+ttl_exp         float   %9.0g                 total work experience
+tenure          float   %9.0g                 job tenure, in years
+hours           int     %8.0g                 usual hours worked
+wks_work        int     %8.0g                 weeks worked last year
+ln_wage         float   %9.0g                 ln(wage/GNP deflator)
+--------------------------------------------------------------------------------
+Sorted by: idcode  year
+
+
+// tabulate college and union status
+tab collgrad
+
+       1 if |
+    college |
+   graduate |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |     23,739       83.20       83.20
+          1 |      4,795       16.80      100.00
+------------+-----------------------------------
+      Total |     28,534      100.00
+
+tab union
+
+ 1 if union |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |     14,728       76.56       76.56
+          1 |      4,510       23.44      100.00
+------------+-----------------------------------
+      Total |     19,238      100.00
+
+
+// generate a variable for log hours worked
+gen log_work_hours = log(hours)
+
+// plot log hours against year separately for union and non-union
+gen union_log_hours = log_work_hours if union == 1
+gen non_union_log_hours = log_work_hours if union == 0
+plot union_log_hours year
+plot non_union_log_hours year
+
+ 4.49981 +  
+         |           *
+         |    *                        *
+    u    |    *   *  *             *   *      *      *   *      *      *  *
+    n    | *  *   *  *             *   *      *      *   *      *      *  *
+    i    | *  *   *  *             *   *      *      *   *      *      *  *
+    o    | *  *   *  *             *   *      *      *   *      *      *  *
+    n    | *  *   *  *             *   *      *      *   *      *      *  *
+    _    | *  *   *  *             *   *      *      *   *      *      *  *
+    l    | *  *   *                *   *      *      *   *      *      *  *
+    o    |           *             *          *      *   *      *         *
+    g    |           *             *          *      *   *      *      *  *
+    _    |        *                *   *      *      *   *             *  *
+    h    |                                    *
+    o    | *      *  *
+    u    | *                       *          *      *          *      *  *
+    r    |                                                      *
+    s    |  
+         |                         *   *             *          *      *  *
+         |  
+       0 +    *
+          +----------------------------------------------------------------+
+               70                 interview year                       88
+
+
+. plot non_union_log_hours year
+
+ 5.12396 +  
+    n    |                                           *
+    o    |  
+    n    |        *                *                                      *
+    _    | *  *      *             *   *      *      *   *             *  *
+    u    | *  *   *  *             *   *      *      *   *      *      *  *
+    n    | *  *   *  *             *   *      *      *   *      *      *  *
+    i    | *  *   *  *             *   *      *      *   *      *      *  *
+    o    | *  *   *  *             *   *      *      *   *      *      *  *
+    n    | *  *   *  *             *   *      *      *   *      *      *  *
+    _    | *  *   *  *             *   *      *      *   *      *      *  *
+    l    | *  *   *  *             *   *      *      *   *      *      *  *
+    o    | *  *   *  *             *   *      *      *   *      *      *  *
+    g    | *  *   *  *             *   *      *      *   *      *      *  *
+    _    | *  *   *  *             *   *      *      *   *      *      *  *
+    h    | *  *   *  *             *   *      *      *   *      *      *  *
+    o    |    *   *  *             *   *      *      *   *      *      *  *
+    u    |  
+    r    | *      *  *                 *      *      *   *      *      *  *
+    s    |  
+       0 +    *                    *                     *      *      *  *
+          +----------------------------------------------------------------+
+               70                 interview year                       88
+
+
+# Effect of union status on hours worked
+
+// Regress hours worked against union status
+regress hours union
+
+      Source |       SS           df       MS      Number of obs   =    19,202
+-------------+----------------------------------   F(1, 19200)     =    136.64
+       Model |   12451.759         1   12451.759   Prob > F        =    0.0000
+    Residual |  1749668.94    19,200  91.1285905   R-squared       =    0.0071
+-------------+----------------------------------   Adj R-squared   =    0.0070
+       Total |   1762120.7    19,201  91.7723398   Root MSE        =    9.5461
+
+------------------------------------------------------------------------------
+       hours |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+       union |   1.900613   .1625944    11.69   0.000     1.581914    2.219312
+       _cons |   36.31125   .0787378   461.17   0.000     36.15691    36.46558
+------------------------------------------------------------------------------
+
+
+
+// What is the identification assumption for the coefficient on union to be causal?
+
+"""The underlying identification assumption is that the only variable that influences 
+the work hours of a certain persion is whether that person is in a union or not. This is 
+very unlikely to be true, as can be seen in the plots above."""
+
+// Regress hours worked against union status with individual (idcode) and year fixed effects
+ssc install reghdfe
+ssc install ftools
+reghdfe hours union, absorb(idcode year)
+
+(dropped 667 singleton observations)
+(MWFE estimator converged in 7 iterations)
+
+HDFE Linear regression                            Number of obs   =     18,535
+Absorbing 2 HDFE groups                           F(   1,  15040) =      61.53
+                                                  Prob > F        =     0.0000
+                                                  R-squared       =     0.5314
+                                                  Adj R-squared   =     0.4226
+                                                  Within R-sq.    =     0.0041
+                                                  Root MSE        =     7.1935
+
+------------------------------------------------------------------------------
+       hours |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+       union |    1.53156   .1952513     7.84   0.000     1.148843    1.914276
+       _cons |   36.45337   .0702729   518.74   0.000     36.31563    36.59111
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+      idcode |      3483           0        3483     |
+        year |        12           1          11     |
+-----------------------------------------------------+
+
+
+
+// What is the identification assumption for the coefficient on union to be causal?
+
+"""The assumption is similar to before, but instead of regressing over all 
+datapoints, we now take differences between individuals and general trends 
+between the different years into account. This should help to eliminate the
+ influence of general larger trends on our regression like for example if 
+ the general membership in unions declined while the average work hours 
+ increased over time. """
+
+ // Now cluster standard errors. What level should you cluster at and why?
+
+reghdfe hours union, absorb(idcode year) vce(cluster year)
+
+"""only clustering the year makes sense of the two variables year and idcode.
+The years are clustered into 12 categories. The order of the idcodes is not 
+assumed to hold valuable information. Therefore, it does not make sense to cluster 
+by them. """
+
+(dropped 667 singleton observations)
+(MWFE estimator converged in 7 iterations)
+
+HDFE Linear regression                            Number of obs   =     18,535
+Absorbing 2 HDFE groups                           F(   1,     11) =     112.84
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.5314
+                                                  Adj R-squared   =     0.4226
+                                                  Within R-sq.    =     0.0041
+Number of clusters (year)    =         12         Root MSE        =     7.1938
+
+                                  (Std. Err. adjusted for 12 clusters in year)
+------------------------------------------------------------------------------
+             |               Robust
+       hours |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+       union |    1.53156   .1441773    10.62   0.000     1.214227    1.848892
+       _cons |   36.45337   .0342105  1065.56   0.000     36.37807    36.52867
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+      idcode |      3483           0        3483     |
+        year |        12          12           0    *|
+-----------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+
+// What do you notice about the coefficients?
+
+"""The standart error decrases and the t values increase resulting in a more 
+significant result."""
+
+// Now add fixed effects for occupation code
+
+reghdfe hours union, absorb(idcode year occ_code)
+
+(dropped 666 singleton observations)
+(MWFE estimator converged in 16 iterations)
+
+HDFE Linear regression                            Number of obs   =     18,463
+Absorbing 3 HDFE groups                           F(   1,  14963) =      42.50
+                                                  Prob > F        =     0.0000
+                                                  R-squared       =     0.5445
+                                                  Adj R-squared   =     0.4380
+                                                  Within R-sq.    =     0.0028
+                                                  Root MSE        =     7.0947
+
+------------------------------------------------------------------------------
+       hours |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+       union |   1.267841   .1944782     6.52   0.000     .8866401    1.649042
+       _cons |   36.52061   .0696974   523.99   0.000       36.384    36.65723
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+      idcode |      3476           0        3476     |
+        year |        12           1          11     |
+    occ_code |        13           1          12    ?|
+-----------------------------------------------------+
+? = number of redundant parameters may be higher
+
+
+// In terms of causal inference, why is adding occupation code 
+// as a control probably not a good idea?
+
+"""The union status has most likely both an influence on workhours and occupation code.
+It would therefore be a collider. It can also be seen, that the t value on union is 
+slightly lower."""
+
+"""I guess c_city as a measure whether the person lives in a central city could be used.
+ The city someone lives in could introduce bias since local policies affect work hours and 
+ union memberships. Therefore i think this would be a  good control. Abunch of other factors 
+ were tested as well, like tenure, age or race, but all of them led to higher standart errors. 
+ All of thoose factors are likely not exogenious to union status. On the other hand, one 
+ could also expect people living in central cities to be more left leaning and therefore 
+ more likely to be a union member. Therefore, it was lastely tried to use wks_ue, which are the 
+ weeks unemployed last week. This resulted in a clearer trend."""
+ 
+// add them to the regression, interacted with year, using this syntax:
+// absorb( ... year##c.(var1 var2 ...))
+// how do these change your estimates?
+
+reghdfe hours union, absorb(idcode  year##c.(wks_ue)) vce(cluster year)
+
+"""This results in a higher union coefficient and better t value."""
+
+(dropped 869 singleton observations)
+(MWFE estimator converged in 9 iterations)
+
+HDFE Linear regression                            Number of obs   =     12,960
+Absorbing 2 HDFE groups                           F(   1,     11) =     130.62
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.5491
+                                                  Adj R-squared   =     0.4020
+                                                  Within R-sq.    =     0.0053
+Number of clusters (year)    =         12         Root MSE        =     7.6944
+
+                                  (Std. Err. adjusted for 12 clusters in year)
+------------------------------------------------------------------------------
+             |               Robust
+       hours |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+       union |   1.864386   .1631305    11.43   0.000     1.505338    2.223434
+       _cons |   35.77556   .0376106   951.21   0.000     35.69278    35.85834
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-------------------------------------------------------+
+   Absorbed FE | Categories  - Redundant  = Num. Coefs |
+---------------+---------------------------------------|
+        idcode |      3163           0        3163     |
+          year |        12          12           0    *|
+ year#c.wks_ue |        12           0          12    ?|
+-------------------------------------------------------+
+? = number of redundant parameters may be higher
+* = FE nested within cluster; treated as redundant for DoF computation
+
+
+
+# Short Essay: Correlation/Causation
+
+Find a news article mistaking correlation for causation. Link to the article 
+and write a short paragraph explaining the mistake.
+
+# https://neurosciencenews.com/anxiety-weight-women-8607/
+
+"""The news article above suggests, that that the amount of 
+abdominal fat a woman has could increase her chances of developing anxiety. 
+Although there seemed to be a study which was able to show a correlation, the 
+effect could go both ways around here. Somebody who is preoccupied struggeling 
+with anxiety, might have less time and energy to lead an active and healthly life 
+and might even be more likely, to compensate bad feelings with food (comfort eating)."""
